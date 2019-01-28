@@ -30,7 +30,7 @@ public class WriteToExcel {
 	 * 
 	 * @return
 	 */
-	public static HSSFWorkbook writeToExcel(List<List<String>> allCaseList) {
+	public static HSSFWorkbook writeToExcel(List<List<String>> allCaseList, String xmindFolderPath) {
 
 		// 第一步：创建Excel工作簿对象
 		HSSFWorkbook workbook = new HSSFWorkbook();
@@ -160,13 +160,13 @@ public class WriteToExcel {
 
 		FileOutputStream out;
 		try {
-			// 生成文件路径 例如"D:\\测试用例.xls"
-			String filePath = "D:\\";
+			// 生成文件路径 /xmindToExcelJava/webapps/Xmind
+			String filePath = xmindFolderPath;
 			// 文件名
 			String fileName = allCaseList.get(0).get(0) + "测试用例.xls";
 
 			// 生成excel文件
-			out = new FileOutputStream(filePath + fileName);
+			out = new FileOutputStream(filePath + "\\" + fileName);
 			workbook.write(out);
 
 			System.out.println("用例转换成功！路径：" + filePath + fileName);

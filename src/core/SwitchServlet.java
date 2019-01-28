@@ -1,9 +1,11 @@
 package core;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.List;
 
 import javax.servlet.ServletContext;
@@ -92,8 +94,27 @@ public class SwitchServlet extends HttpServlet {
 					List<List<String>> allCaseList = ReadXml.readXml(xmlPath);
 					
 					// 通过调用writeToExcel方法写入Excel
-					WriteToExcel.writeToExcel(allCaseList);
-
+					WriteToExcel.writeToExcel(allCaseList,xmindFolderPath);
+					
+					// 下载
+					String downName = fileName.substring(0, fileName.indexOf(".")) + "测试用例.xls";
+					// 设置响应头，控制浏览器下载该文件
+					response.setHeader("content-disposition",
+							"attachment;filename=" + new String(downName.getBytes("UTF-8"), "ISO8859-1"));
+					// 读取要下载的文件，保存到文件输入流
+					FileInputStream fileInputStream = new FileInputStream(xmindFolderPath + "\\" + downName);
+					// 创建输出流
+					OutputStream outputStream = response.getOutputStream();
+					// 创建缓冲区
+					byte buffer[] = new byte[1024];
+					int i = 0;
+					while ((i = fileInputStream.read(buffer)) > 0) {
+						outputStream.write(buffer, 0, i);
+					}
+					// 关闭流
+					fileInputStream.close();
+					outputStream.close();
+					
 					// 删除zip文件及解压文件
 					UnZipUtil.delAllFiles(new File(xmlPath), null, xmlPath);
 					srcZipFile.delete();
