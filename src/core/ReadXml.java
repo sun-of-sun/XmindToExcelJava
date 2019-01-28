@@ -1,10 +1,8 @@
 package core;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -13,122 +11,26 @@ import org.dom4j.DocumentException;
 import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
 
-/**
- * 
- * @author XU_SUN
- * @version 1.1.0
- */
+import entry.NodeObj;
+
 public class ReadXml {
 
-	public static void main(String[] args) {
-		String path = "src/xmind/";
-		readFile(path);
-	}
-
-	/**
-	 * 获取文件夹下边的所有文件
-	 * @param path
-	 */
-	public static void readFile(String path) {
-		
-		File file = new File(path);
-		// 获取所有目录下的文件、文件夹
-		File[] files = file.listFiles();
-		// 如果文件为空则停止
-		if(null == files || files.length == 0) {
-			System.out.println("未找到文件");
-			return;
-		}
-		
-		// 遍历获取路径下所有文件、文件夹
-		for (int i = 0; i < files.length; i++) {
-			if (files[i].isDirectory()) {
-				readFile(files[i].getAbsolutePath());
-			} else {
-				String oldPath = files[i].getAbsolutePath();
-				// 获取文件类型
-				String prefix = oldPath.substring(oldPath.lastIndexOf(".") + 1);
-				// 需要替换的文件类型
-				String newPath = oldPath.replace(".xmind", ".zip");
-				// 指定复制替换的文件类型
-				if (prefix.equals("xmind")) {
-					copy(oldPath, newPath);
-				}
-//				System.out.println(files[i].getAbsolutePath());
-				
-				// 解压
-				unZipGetXml(path,newPath);
-			}
-		}
-	}
-
-	/**
-     * 复制文件
-     *
-     * @param oldPath 需要复制的文件路径
-     * @param newPath 复制后的文件路劲
-     */
-    public static void copy(String oldPath, String newPath) {
-        try {
-            File oldfile = new File(oldPath);
-            if (oldfile.exists()) {
-            	// 创建I/O流，读取源文件信息，写入新文件
-                InputStream inStream = new FileInputStream(oldPath);
-                FileOutputStream fileOfutputStream = new FileOutputStream(newPath);
-                byte[] buffer = new byte[1024];
-                int length;
-                // 读取源文件信息，写入新文件
-                while ((length = inStream.read(buffer)) != -1) {
-                    fileOfutputStream.write(buffer, 0, length);
-                }
-                // 关闭资源
-                inStream.close();
-                fileOfutputStream.close();
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-    /**
-     * 解压zip
-     * @param path main方法中的path，存放xmind文件的路径
-     * @param newPath
-     */
-    public static void unZipGetXml(String path,String newPath) {
-    	
-    	// 获取zip文件的文件名
-    	String zipFileName = newPath.substring(newPath.lastIndexOf("\\")+1);
-    	File zipFile = new File(path,zipFileName);
-    	
-    	// 单个Xmind解压路径
-//    	String ownPath = zipFileName.substring(0,zipFileName.indexOf("."));
-//    	String destDirPath = "src/xmlFile/" + ownPath + "/";
-    	
-    	// 解压的目标文件夹
-    	String destDirPath = "src/xmlFile/";
-    	UnZipUtil.unZip(zipFile,destDirPath);
-	    
-        readXml();
-        
-        // 删除zip文件及解压文件
-        UnZipUtil.delAllFiles(new File(destDirPath),null,destDirPath);
-        zipFile.delete();
-    }
-    
-	
 	/**
 	 * 解析xml文件
 	 * 
 	 * @author XU_SUN
 	 */
-	public static void readXml() {
+	public static List<List<String>> readXml(String xmlPath) {
+
+		// 所有用例集合
+		List<List<String>> allCaseList = null;
 		
 		// 解析xml文件
 		// 创建SAXReader的对象reader
 		SAXReader reader = new SAXReader();
 		try {
 			// 通过reader对象的read方法加载xml文件，获取docuemnt对象
-			Document document = reader.read(new File("src/xmlFile/content.xml"));
+			Document document = reader.read(new File(xmlPath + "content.xml"));
 
 			// 通过document对象获取根节点，即xml中的<xmap-content>
 			Element rootNode = document.getRootElement();
@@ -139,45 +41,35 @@ public class ReadXml {
 			Element centerTopicNode = sheetNode.element("topic");
 			// 删除<topic>下的子节点<extensions>
 			centerTopicNode.remove(centerTopicNode.element("extensions"));
-			// ★★★【取得中心节点标题】★★★
-			// String centerTopicTitleText = centerTopicNode.element("title").getStringValue();
-			// System.out.println("获取到中心节点标题：" + centerTopicTitleText);
 
-			// 创建一个集合，用于获取所有<title>节点
-			List<Element> allNeedNodeList = new ArrayList<Element>();
+			// 创建一个集合，获取所有<title>节点，并转换为NodeObj
+			List<NodeObj> allObjList = new ArrayList<>();
 			// 调用方法getAllNeedNodes获取所有title节点
-			getAllNeedNodes(centerTopicNode, allNeedNodeList);
-			
-			// 打印到控制台验证一下取到的子节点是否正常
-//			for (int i = 0; i < allNeedNodeList.size(); i++) {
-//				System.out.println(allNeedNodeList.get(i).getText());
-//			}
-			
-			// 调用getNodeObj方法遍历集合，得到所有节点对象集合
-			List<NodeObj> allObjList = ObjToCase.getNodeObj(allNeedNodeList);
-			// 调用getLeafObjList方法遍历集合，得到所有叶子对象
-			List<NodeObj> leafObjList = ObjToCase.getLeafObjList(allObjList);
+			getAllObj(centerTopicNode, allObjList);
 			
 			// 所有用例集合
-			List<List<String>> allCaseList = new ArrayList<>();
-			// 调用toCase方法，获得所有用例
-			ObjToCase.toCase(leafObjList, allObjList,allCaseList);
+			allCaseList = new ArrayList<>();
+
+			// 调用getLeafObjList方法遍历集合，得到所有叶子对象
+			// 通过叶子对象获取父对象，递归找到该用例下所有对象，组成一条用例
+			// 将所有用例放入总用例集合
+			getLeafObjList(allObjList,allCaseList);
 			
-			//通过调用writeToExcel方法写入Excel
-			WriteToExcel.writeToExcel(allCaseList);
-			
+
 		} catch (DocumentException e) {
 			e.printStackTrace();
 		}
+		return allCaseList;
 	}
 
 	/**
-	 * 递归获取所有title节点
-	 * xml节点关系为：topic → title/children → topics → topic → title/children  → .....
+	 * 获取所有title节点，并转换为NodeObj
+	 * 递归获取所有title节点 xml节点关系为：topic → title/children →
+	 * topics → topic → title/children → .....
 	 * 
 	 * @author XU_SUN
 	 */
-	public static void getAllNeedNodes(Element centerTopicNode, List<Element> allNeedNodeList) {
+	public static void getAllObj(Element centerTopicNode, List<NodeObj> allObjList) {
 
 		// 通过中心节点centerTopicNode的elementIterator方法获取迭代器
 		Iterator it = centerTopicNode.elementIterator();
@@ -192,18 +84,89 @@ public class ReadXml {
 			// 如果集合不为空（即仍有下一级节点），则继续查找，递归
 			if (childEltList.size() > 0) {
 				// 继续查找children/topics的下级节点
-				getAllNeedNodes(childElement, allNeedNodeList);
+				getAllObj(childElement, allObjList);
 			} else {
-				// 将title节点放入allNeedNodes集合
-				allNeedNodeList.add(childElement);
+				// 将Element对象转换成NodeObj对象
+				NodeObj nodeObj = new NodeObj();
+
+				// 获取节点自己的id，即title上层节点topic的id属性
+				nodeObj.setId(childElement.getParent().attributeValue("id"));
+				// 获取节点title的内容，设置给节点对象的titleText属性
+				nodeObj.setTitleText(childElement.getText());
+
+				// title标签上层的上层，topic → topics/sheet，如果为sheet，说明该节点为中心节点
+				if ("sheet".equals(childElement.getParent().getParent().getName())) {
+					// 将中心节点的PID设置为centerTopicNoPID
+					nodeObj.setpId("centerTopicNoPID");
+				} else {
+					// 其他节点title → topic → topics → children → topic → ...
+					nodeObj.setpId(childElement.getParent().getParent().getParent().getParent().attributeValue("id"));
+				}
+				// 把节点对象放入nodeObjList集合
+				allObjList.add(nodeObj);
 			}
-			// 方案二：另一种解决思路
-			// 通过selectNodes方法获取子节点，并且将Node类型强转为Element类型
-			// for (Node n : childElement.selectNodes("*")) {
-			// Element e = (Element) n;
-			// }
+		}
+	} // getAllObj()
+
+	/**
+	 * 获取所有叶子对象
+	 * 
+	 * @param allNeedNodeList
+	 * @author XU_SUN
+	 */
+	public static void getLeafObjList(List<NodeObj> allObjList, List<List<String>> allCaseList) {
+
+		// 复制该集合
+		List<NodeObj> copyObjList = new ArrayList<>(allObjList);
+
+		// 遍历两个集合，找出叶子对象
+		for (NodeObj leafObj : copyObjList) {
+			// 假设leafObj是叶子对象，flag为true
+			boolean flag = true;
+			for (NodeObj all : allObjList) {
+				// id = pid，说明不是叶子对象，flag=false
+				if (leafObj.getId().equals(all.getpId())) {
+					// 方案二：也可以给外层循环命名，当id = pid时，continue外层循环，对下一个copy对象进行遍历
+					flag = false;
+				}
+			}
+			// 当leafObj是叶子对象的时候，寻找它的父对象组成一条用例
+			if (flag) {
+				// 单条用例
+				List<String> caseList = new ArrayList<>();
+				// 先将叶子集合放入单条用例集合中
+				caseList.add(leafObj.getTitleText());
+
+				// 调用getItParent()，寻找它的父对象组成一条用例
+				getItParent(leafObj, allObjList, caseList);
+
+				// 此时用例集合中元素的顺序为： 叶子对象 → 父对象 → ... → 根对象，因此需要通过Collections.reverse()倒序排列
+				Collections.reverse(caseList);
+				// 加入总用例集合
+				allCaseList.add(caseList);
+			}
+		}
+	} // getLeafObjList()
+
+	/**
+	 * 递归， 通过叶子对象获取父对象，递归找到该用例下所有对象，加入到用例集合中，组成一条用例
+	 * 
+	 * @param leafObj    叶子对象
+	 * @param allObjList 所有对象集合
+	 * @param caseList   测试用例集合（已在toCase方法中创建）
+	 * @author XU_SUN
+	 */
+	public static void getItParent(NodeObj leafObj, List<NodeObj> allObjList, List<String> caseList) {
+		
+		// 遍历所有对象集合
+		for (NodeObj allObj : allObjList) {
+			// 如果是leafObj的父对象，则加入caseList单条用例集合
+			if (leafObj.getpId().equals(allObj.getId())) {
+				caseList.add(allObj.getTitleText());
+				// 递归，继续寻找父对象的父对象
+				getItParent(allObj, allObjList, caseList);
+			}
 		}
 	}
 	
-
 }
