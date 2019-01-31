@@ -1,0 +1,25 @@
+
+本项目在Eclipse中运行正常，到了Idea不知道为什么一直报错
+
+SwitchServlet
+// 将xmind文件转存为zip文件
+File srcZipFile = new File(xmindFolderPath, zipFileName);
+=================================================================
+java.io.FileNotFoundException: D:\coding\myGitHub\XmindToExcelJava\target\XmindToExcelJava\Xmind\Test.zip (系统找不到指定的路径。)
+	java.io.FileOutputStream.open0(Native Method)
+	java.io.FileOutputStream.open(FileOutputStream.java:270)
+	java.io.FileOutputStream.<init>(FileOutputStream.java:213)
+	java.io.FileOutputStream.<init>(FileOutputStream.java:162)
+	core.SwitchServlet.doPost(SwitchServlet.java:77)
+	javax.servlet.http.HttpServlet.service(HttpServlet.java:660)
+	javax.servlet.http.HttpServlet.service(HttpServlet.java:741)
+	org.apache.tomcat.websocket.server.WsFilter.doFilter(WsFilter.java:53)
+=================================================================
+后来受到其他人的启发：
+https://blog.csdn.net/qq_32340877/article/details/79252914
+将原本放在WEB-INF下的Xmind，挪到WEB-INF外
+XmindToExcelJava/src/main/webapp/WEB-INF/Xmind
+↓
+XmindToExcelJava/src/main/webapp/Xmind
+
+哎，好使了你说气不气
