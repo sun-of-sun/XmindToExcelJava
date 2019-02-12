@@ -1,4 +1,4 @@
-package entry;
+package entity;
 
 /**
  * 节点对象

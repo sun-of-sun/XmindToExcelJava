@@ -11,7 +11,7 @@ import org.dom4j.DocumentException;
 import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
 
-import entry.NodeObj;
+import entity.NodeObj;
 
 public class ReadXml {
 
@@ -110,9 +110,8 @@ public class ReadXml {
 
 	/**
 	 * 获取所有叶子对象
-	 * 
-	 * @param allNeedNodeList
-	 * @author XU_SUN
+	 * @param allObjList
+	 * @param allCaseList
 	 */
 	public static void getLeafObjList(List<NodeObj> allObjList, List<List<String>> allCaseList) {
 

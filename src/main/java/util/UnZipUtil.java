@@ -12,7 +12,7 @@ public class UnZipUtil {
 	/**
 	 * zip解压
 	 * 
-	 * @param zipFile     zip源文件
+	 * @param srcFile     zip源文件
 	 * @param destDirPath 解压后的目标文件夹
 	 * @throws RuntimeException 解压失败会抛出运行时异常
 	 */
@@ -30,7 +30,7 @@ public class UnZipUtil {
 			Enumeration<?> entries = zipFile.entries();
 			while (entries.hasMoreElements()) {
 				ZipEntry entry = (ZipEntry) entries.nextElement();
-//				System.out.println("解压" + entry.getName());
+//				System.out.println("解压" + entity.getName());
 				// 如果是文件夹，就创建个文件夹
 				if (entry.isDirectory()) {
 					String dirPath = destDirPath + "/" + entry.getName();
