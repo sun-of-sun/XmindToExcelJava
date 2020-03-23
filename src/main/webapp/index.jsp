@@ -22,7 +22,8 @@
 <div>
     <center style="color: #d4d4d4">This is my welcome page.</center>
     <center class="topmargin" style="font-size: 30px">
-        XMind文件转换为Excel <abbr title="请选择需要转换的Xmind文件，点击提交"
+        XMind文件转换为Excel <abbr title="请选择需要转换的Xmind文件，点击提交。
+如果您未使用“预期结果”占位符，则需您手动修改导出后的EXCEL表头。"
                               style="font-size: 15px; color: #5bc0de"> <span
             class="glyphicon glyphicon-info-sign"></span>
     </abbr>

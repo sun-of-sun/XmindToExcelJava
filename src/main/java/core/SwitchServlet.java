@@ -95,12 +95,12 @@ public class SwitchServlet extends HttpServlet {
 					
 					// 读取Xml文件，获取所有用例集合
 					List<List<String>> allCaseList = ReadXml.readXml(xmlPath);
-					
+
 					// 通过调用writeToExcel方法写入Excel
 					WriteToExcel.writeToExcel(allCaseList,xmindFolderPath);
 					
 					// 下载
-					String downName = fileName.substring(0, fileName.indexOf(".")) + "测试用例.xls";
+					String downName = fileName.substring(0, fileName.lastIndexOf(".")) + "测试用例.xls";
 					// 设置响应头，控制浏览器下载该文件
 					response.setHeader("content-disposition",
 							"attachment;filename=" + new String(downName.getBytes("UTF-8"), "ISO8859-1"));
@@ -121,7 +121,6 @@ public class SwitchServlet extends HttpServlet {
 					// 删除zip文件及解压文件
 					UnZipUtil.delAllFiles(new File(xmlPath), null, xmlPath);
 					srcZipFile.delete();
-
 				}
 
 			}

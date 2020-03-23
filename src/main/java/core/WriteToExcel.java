@@ -103,6 +103,7 @@ public class WriteToExcel {
             String resultStr = "";
             int resNum = 1;
 
+
             // 取出每一个用例小步骤
             for (int j = 0; j < caseList.size(); j++) {
 
@@ -116,42 +117,56 @@ public class WriteToExcel {
 
                 // 0项目，1模块，2功能，3子功能，4操作步骤，5预期结果（定位元素），6实际结果
                 // 获取定位元素 预期结果 的下标,如果没有，则expect = -1
-                int expect = caseList.indexOf("预期结果");
-                // 操作步骤
-                if (j >= 4 && j < expect) {
-                    // 如果 不是最后一个步骤，则加上回车
-                    if (!(j == expect - 1)) {
-                        operationStr = operationStr + operaNum + "." + caseList.get(j) + " \n";
-                    } else {
-                        operationStr = operationStr + operaNum + "." + caseList.get(j);
-                    }
-                    operaNum++;
+                int expect = -1;
+                // 如果有占位符“预期结果”
+                if (caseList.contains("预期结果")) {
+                    // 获取定位元素 预期结果 的下标,如果没有，则expect = -1
+                    expect = caseList.indexOf("预期结果");
+                    // 操作步骤
+                    if (j >= 4 && j < expect) {
+                        // 如果 不是最后一个步骤，则加上回车
+                        if (!(j == expect - 1)) {
+                            operationStr = operationStr + operaNum + "." + caseList.get(j) + " \n";
+                        } else {
+                            operationStr = operationStr + operaNum + "." + caseList.get(j);
+                        }
+                        operaNum++;
 
-                    // 操作步骤写入Excel第6列
-                    HSSFCell cellOpera = row.createCell(5);
-                    cellOpera.setCellValue(operationStr.toString());
-                    cellOpera.setCellStyle(getCellStyle(style, font));
+                        // 操作步骤写入Excel第6列
+                        HSSFCell cellOpera = row.createCell(5);
+                        cellOpera.setCellValue(operationStr.toString());
+                        cellOpera.setCellStyle(getCellStyle(style, font));
+                    }
+
+                    // 结果
+                    if (expect != -1 && j > expect) {
+                        // 如果 不是最后一个步骤，则加上回车
+                        if (!(j == caseList.size() - 1)) {
+                            resultStr = resultStr + resNum + "." + caseList.get(j) + " \n";
+                        } else {
+                            resultStr = resultStr + resNum + "." + caseList.get(j);
+                        }
+                        resNum++;
+
+                        // 结果写入Excel第7列
+                        HSSFCell cellRes = row.createCell(6);
+                        cellRes.setCellValue(resultStr.toString());
+                        cellRes.setCellStyle(getCellStyle(style, font));
+                    }
+
+                    // 实际结果
+                    HSSFCell cellActualRes = row.createCell(7);
+                    cellActualRes.setCellStyle(getCellStyle(style, font));
+
+
+                // 如果没有占位符“预期结果”，则从cell5（即j = 4，除了序号外，用例的第4格开始）
+                }else{
+                    // 此时 j = 4，内容应填入cell5
+                    HSSFCell cellStep = row.createCell(j + 1);
+                    cellStep.setCellValue(caseList.get(j));
+                    cellStep.setCellStyle(getCellStyle(style, font));
                 }
 
-                // 结果
-                if (expect != -1 && j > expect) {
-                    // 如果 不是最后一个步骤，则加上回车
-                    if (!(j == caseList.size() - 1)) {
-                        resultStr = resultStr + resNum + "." + caseList.get(j) + " \n";
-                    } else {
-                        resultStr = resultStr + resNum + "." + caseList.get(j);
-                    }
-                    resNum++;
-
-                    // 结果写入Excel第7列
-                    HSSFCell cellRes = row.createCell(6);
-                    cellRes.setCellValue(resultStr.toString());
-                    cellRes.setCellStyle(getCellStyle(style, font));
-                }
-
-                // 实际结果
-                HSSFCell cellActualRes = row.createCell(7);
-                cellActualRes.setCellStyle(getCellStyle(style, font));
 
             }
 
@@ -168,7 +183,7 @@ public class WriteToExcel {
             out = new FileOutputStream(filePath + "\\" + fileName);
             workbook.write(out);
 
-            System.out.println("用例转换成功！路径：" + filePath + fileName);
+            System.out.println("用例转换成功！路径：" + filePath + "\\" + fileName);
             out.close();
 
         } catch (FileNotFoundException e) {
@@ -183,7 +198,7 @@ public class WriteToExcel {
     /**
      * 设置表头格式 颜色可参照：https://blog.csdn.net/w405722907/article/details/76915903
      *
-     * @param workbook
+     * @param
      * @return
      */
     public static HSSFCellStyle getHeadStyle(HSSFCellStyle styleHead, HSSFFont fontHead) {
@@ -223,7 +238,7 @@ public class WriteToExcel {
      * 设置单元格格式 颜色可参照：https://blog.csdn.net/w405722907/article/details/76915903
      * 对格式的设置进行优化，提升了性能：https://blog.csdn.net/qq592304796/article/details/52608714/
      *
-     * @param workbook
+     * @param
      * @return
      */
     public static HSSFCellStyle getCellStyle(HSSFCellStyle style, HSSFFont font) {
