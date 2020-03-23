@@ -159,6 +159,11 @@ public class ReadXml {
 		
 		// 遍历所有对象集合
 		for (NodeObj allObj : allObjList) {
+			// 遇到img,note等其他(id,parentId)为空的节点时跳过
+			if (leafObj.getId() == null) {
+				continue;
+			}
+
 			// 如果是leafObj的父对象，则加入caseList单条用例集合
 			if (leafObj.getpId().equals(allObj.getId())) {
 				caseList.add(allObj.getTitleText());

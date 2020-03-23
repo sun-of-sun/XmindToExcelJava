@@ -30,10 +30,12 @@ import util.UnZipUtil;
 @WebServlet("/upload.do")
 public class SwitchServlet extends HttpServlet {
 
+	@Override
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 	}
 
+	@Override
 	protected void doPost(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 		// 拿到全局对象
